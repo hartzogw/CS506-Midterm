@@ -9,21 +9,6 @@ def run_server(port):
   print(f"Server instance started at port {port}\n")
   httpd.serve_forever()
 
-def check_server(address):
-  try:
-    response = requests.get(address + '/health', timeout=1)
-    if response.status_code == 200:
-      return True
-    else:
-      return False
-  except:
-    return False
-
-#find a server
-def find_server():
-  if check_server:
-    return check_server()
-  return None
 
 # Start servers using threading
 threads = []
