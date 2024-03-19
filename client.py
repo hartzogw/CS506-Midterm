@@ -1,5 +1,17 @@
 import socket
-import threading 
+import threading
+
+ADDRESSES = [("localhost", 8080), ("localhost", 8081), ("localhost", 8082)]
+
+def check_servers(address, port):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(2)
+            sock.connect((address, port))
+        return True
+    except:
+        return False
+
 
 def receive(client, name):
     while True:
@@ -7,7 +19,7 @@ def receive(client, name):
             # Message recieves from server
             msg = client.recv(1024).decode("utf-8")
             if msg == 'Nickname':
-                client.send(name.encode("utf-8"))            
+                client.send(name.encode("utf-8"))
             else:
                 print(msg)
         except:
@@ -15,52 +27,78 @@ def receive(client, name):
             client.close()
             break
 
+
 def write(client, name):
     while True:
-        # Get user input
-        msg = input("")
-        
-        # Keyword to leave the chat
-        if msg.lower() == 'closed':
-            print("\nGoodbye")
+        try:
+            # Get user input
+            msg = input("")
+
+            # Keyword to leave the chat
+            if msg.lower() == 'closed':
+                print("\nGoodbye")
+                client.close()
+                break
+
+            # Send message to server
+            msg = f'{name}: {msg}'
+            client.send(msg.encode("utf-8"))
+        except:
+            print("Server shuts down!")
             client.close()
             break
-        
-        # Send message to server
-        msg =f'{name}: {msg}'        
-        client.send(msg.encode("utf-8"))
-           
+
+
 def run_client():
+    server_ports = [8080, 8081, 8082]
+    server_ips = ["localhost"]
+
     # Let user select the server
     while True:
-        print("\nAvailable Port Numbers: 8080, 8081, 8082")
+        print("Available ports: ")
+        for port in server_ports:
+            print(port)
         print("Enter Port Number: ")
-        msg = input("")
-        
+        msg = int(input(""))
+
         # Check user input
-        if msg == '8080' or msg == '8081' or msg =='8082':
+        if msg in server_ports:
             break
         else:
             print("\nInvalid Port!")
-    
+
     # Server hostname or IP address
-    server_ip = "localhost"  
-    server_port = int(msg)
+
     name = input("Enter a nickname: ")
-    
+
+
     # Create a socket object
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    # Establish connection with server
-    client.connect((server_ip, server_port))
-    
-    # Start thread for recieving message    
+
+    #Establish connection with server
+    try:
+        #if check_servers(server_ips[0], msg):
+        client.connect((server_ips[0], msg))
+    except ConnectionRefusedError:
+        print("Connection refused! Trying other available ports...")
+        try:
+            for server_ip, server_port in zip(server_ips, server_ports):
+                client.connect((server_ip, server_port))
+                if client:
+                    break
+        except ConnectionRefusedError: print("No connections available")
+
+    except ConnectionAbortedError:
+        print("Connection was aborted!")
+
+    # Start thread for recieving message
     receive_thread = threading.Thread(target=receive, args=(client, name))
     receive_thread.start()
-    
+
     # Start thread to send message
     write_thread = threading.Thread(target=write, args=(client, name))
     write_thread.start()
+
 
 if __name__ == "__main__":
     run_client()
