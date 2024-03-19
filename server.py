@@ -28,6 +28,7 @@ def handle_client(client_socket, addr, clients, names):
                 clients.remove(client_socket)
                 client_socket.close()
                 nickname = names[idx]
+                names.pop(idx)
                 msg = f"{nickname} left the chat!".encode("utf-8")
                 broadcast(msg)
                 break
