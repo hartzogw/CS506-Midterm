@@ -86,7 +86,7 @@ if __name__ == "__main__":
     server_ip = "localhost"
 
     # Create multiple server instances
-    for port in [8082]:
+    for port in [8080, 8081, 8082]:
         thread = threading.Thread(target=run_server, args=(port, names, threads))
         threads.append(thread)
         thread.start()

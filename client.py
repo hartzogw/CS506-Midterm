@@ -51,7 +51,7 @@ def write(client, name):
 
 def run_client():
     server_ports = [8080, 8081, 8082]
-    server_ips = ["localhost", "localhost", "localhost"]
+    server_ips = ["localhost"]
 
     # Let user select the server
     while True:
