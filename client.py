@@ -51,7 +51,7 @@ def write(client, name):
 
 def run_client():
     server_ports = [8080, 8081, 8082]
-    server_ips = ["localhost"]
+    server_ips = ["localhost", "localhost", "localhost"]
 
     # Let user select the server
     while True:
@@ -82,11 +82,14 @@ def run_client():
     except ConnectionRefusedError:
         print("Connection refused! Trying other available ports...")
         try:
-            for server_ip, server_port in zip(server_ips, server_ports):
-                client.connect((server_ip, server_port))
-                if client:
-                    break
-        except ConnectionRefusedError: print("No connections available")
+            client.connect((server_ips[0], 8081))
+        except ConnectionRefusedError:
+            print("Connection refused! Trying other available ports...")
+            try:
+                client.connect((server_ips[0], 8082))
+            except ConnectionRefusedError:
+                print("No available ports!")
+
 
     except ConnectionAbortedError:
         print("Connection was aborted!")
